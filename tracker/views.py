@@ -42,10 +42,9 @@ class BudgetSetupViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         budget = serializer.save(user=self.request.user)
-        # Auto-create 30 empty daily entries
         for day in range(1, 31):
             DailyEntry.objects.create(budget=budget, day=day)
-
+        
     @action(detail=False, methods=['get'], url_path='current')
     def current(self, request):
         month = request.query_params.get('month')

@@ -23,11 +23,17 @@ def create_user_profile(sender, instance, created, **kwargs):
 class BudgetSetup(models.Model):
     """One budget setup per user per month."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budgets')
-    month = models.CharField(max_length=7, help_text="Format: YYYY-MM")  # e.g., 2026-01
-    monthly_income = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    essentials_pct = models.DecimalField(max_digits=5, decimal_places=2, default=50)
-    wants_pct = models.DecimalField(max_digits=5, decimal_places=2, default=30)
-    savings_pct = models.DecimalField(max_digits=5, decimal_places=2, default=20)
+    month = models.CharField(max_length=7, help_text="Format: YYYY-MM")
+
+    # Optional context — helps with progress display
+    monthly_income = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0,
+        help_text="Optional. Used only for % context."
+    )
+
+    # The locked savings commitment
+    savings_goal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -35,16 +41,10 @@ class BudgetSetup(models.Model):
         unique_together = ('user', 'month')
 
     @property
-    def essentials_limit(self):
-        return self.monthly_income * self.essentials_pct / 100
-
-    @property
-    def wants_limit(self):
-        return self.monthly_income * self.wants_pct / 100
-
-    @property
-    def savings_limit(self):
-        return self.monthly_income * self.savings_pct / 100
+    def savings_pct(self):
+        if not self.monthly_income:
+            return None
+        return round(float(self.savings_goal) / float(self.monthly_income) * 100, 2)
 
     def __str__(self):
         return f"{self.user.username} - {self.month}"
@@ -56,7 +56,6 @@ class DailyEntry(models.Model):
     date = models.DateField(null=True, blank=True)
     essentials = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     wants = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    savings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.CharField(max_length=255, blank=True)
 
     class Meta:
@@ -65,7 +64,7 @@ class DailyEntry(models.Model):
 
     @property
     def daily_total(self):
-        return self.essentials + self.wants + self.savings
+        return self.essentials + self.wants
 
     def __str__(self):
         return f"Day {self.day} - {self.budget}"

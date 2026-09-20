@@ -44,34 +44,28 @@ class DailyEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DailyEntry
-        fields = ['id', 'day', 'date', 'essentials', 'wants', 'savings', 'notes', 'daily_total']
+        fields = ['id', 'day', 'date', 'essentials', 'wants', 'notes', 'daily_total']
 
 
 class BudgetSetupSerializer(serializers.ModelSerializer):
     entries = DailyEntrySerializer(many=True, read_only=True)
-    essentials_limit = serializers.ReadOnlyField()
-    wants_limit = serializers.ReadOnlyField()
-    savings_limit = serializers.ReadOnlyField()
+    savings_pct = serializers.ReadOnlyField()
 
     class Meta:
         model = BudgetSetup
         fields = [
-            'id', 'month', 'monthly_income',
-            'essentials_pct', 'wants_pct', 'savings_pct',
-            'essentials_limit', 'wants_limit', 'savings_limit',
-            'entries', 'created_at', 'updated_at',
+            'id', 'month', 'monthly_income', 'savings_goal',
+            'savings_pct', 'entries', 'created_at', 'updated_at',
         ]
 
     def validate(self, data):
-        total = (
-            data.get('essentials_pct', getattr(self.instance, 'essentials_pct', 0)) +
-            data.get('wants_pct', getattr(self.instance, 'wants_pct', 0)) +
-            data.get('savings_pct', getattr(self.instance, 'savings_pct', 0))
-        )
-        if abs(float(total) - 100.0) > 0.01:
-            raise serializers.ValidationError("Percentages must add up to 100.")
+        income = float(data.get('monthly_income', 0) or 0)
+        savings = float(data.get('savings_goal', 0) or 0)
+        if savings <= 0:
+            raise serializers.ValidationError("Please enter a savings amount greater than 0.")
+        if income and savings >= income:
+            raise serializers.ValidationError("Savings goal must be less than your income.")
         return data
-
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
