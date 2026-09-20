@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile, BudgetSetup, DailyEntry, Article, DailyQuote
+from .models import UserProfile, BudgetSetup, DailyEntry, Article, DailyQuote, Subscriber, SiteStatus
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -9,12 +9,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'display_name', 'bio']
+        fields = ['id', 'username', 'is_staff', 'email', 'display_name', 'bio']
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
+        instance.is_staff = validated_data.get('is_staff', instance.is_staff)
         instance.save()
         profile = instance.profile
         profile.display_name = profile_data.get('display_name', profile.display_name)
@@ -77,3 +78,13 @@ class DailyQuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = DailyQuote
         fields = '__all__'
+
+class SubscriberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscriber
+        fields = ['id', 'email', 'created_at']
+
+class SiteStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteStatus
+        fields = ['is_live', 'updated_at']

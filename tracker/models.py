@@ -98,3 +98,40 @@ class DailyQuote(models.Model):
 
     def __str__(self):
         return self.text[:60]
+
+
+class SiteStatus(models.Model):
+    """Singleton row that controls whether the real site is live."""
+    is_live = models.BooleanField(
+        default=False,
+        help_text="When OFF, visitors see the Coming Soon page. Admins always see the real site."
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Site Status"
+        verbose_name_plural = "Site Status"
+
+    def save(self, *args, **kwargs):
+        # Enforce a single row
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "LIVE" if self.is_live else "Coming Soon"
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.email

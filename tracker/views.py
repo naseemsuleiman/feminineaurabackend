@@ -1,13 +1,13 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from .models import BudgetSetup, DailyEntry, Article, DailyQuote
+from .models import BudgetSetup, DailyEntry, Article, DailyQuote, Subscriber, SiteStatus
 from .serializers import (
     UserSerializer, RegisterSerializer, BudgetSetupSerializer,
-    DailyEntrySerializer, ArticleSerializer, DailyQuoteSerializer
+    DailyEntrySerializer, ArticleSerializer, DailyQuoteSerializer, SubscriberSerializer, SiteStatusSerializer
 )
 
 
@@ -85,3 +85,31 @@ class DailyQuoteViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DailyQuoteSerializer
     permission_classes = [AllowAny]
     queryset = DailyQuote.objects.filter(active=True).order_by('-created_at')[:10]
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def subscribe_view(request):
+    serializer = SubscriberSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'ok': True}, status=201)
+    if 'email' in serializer.errors:
+        # Already subscribed — treat as success
+        return Response({'ok': True, 'note': 'Already subscribed'}, status=200)
+    return Response(serializer.errors, status=400)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def site_status_view(request):
+    """Public endpoint — tells the frontend whether the real site is live."""
+    return Response(SiteStatusSerializer(SiteStatus.get()).data)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def subscribers_list_view(request):
+    """Admin-only — list all subscribers."""
+    subs = Subscriber.objects.all()
+    return Response({
+        'count': subs.count(),
+        'subscribers': SubscriberSerializer(subs, many=True).data,
+    })
