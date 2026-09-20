@@ -4,7 +4,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-change-me-in-production-xyz123'
+SECRET_KEY = 'ze9@isl)lpeotboyv-ayt^96j)xfg#9lh&6f#5!@@wx$#41&dp'
 SECRET_KEY = os.getenv('SECRET_KEY', SECRET_KEY)
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 ALLOWED_HOSTS = ['*']
