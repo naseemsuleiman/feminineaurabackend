@@ -89,13 +89,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
-        'CORS_ALLOWED_ORIGINS',
-        'http://localhost:5173,http://127.0.0.1:5173',
-    ).split(',')
-    if origin.strip()
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://www.feminine-aura.com",
+    "https://feminine-aura.com",
+    "https://feminineaurafrontend-ppymbaghi-naseems-projects-20034b0c.vercel.app",
 ]
+
+# Allow ANY Vercel, Netlify, and Render preview subdomain
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^https://.*\.netlify\.app$",
+    r"^https://.*\.onrender\.com$",
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 # DRF
