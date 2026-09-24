@@ -10,7 +10,6 @@ class SiteStatusAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'is_live', 'updated_at')
 
     def has_add_permission(self, request):
-        # Only one row ever
         return not SiteStatus.objects.exists()
 
     def has_delete_permission(self, request, obj=None):

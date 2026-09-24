@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --no-input
-    startCommand: gunicorn feminine_aura.wsgi:application
+    startCommand: gunicorn --bind 0.0.0.0:$PORT feminine_aura.wsgi:application
     healthCheckPath: /api/site-status/
     envVars:
       - key: SECRET_KEY
