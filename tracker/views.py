@@ -128,3 +128,21 @@ class DailyQuoteViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DailyQuoteSerializer
     permission_classes = [AllowAny]
     queryset = DailyQuote.objects.filter(active=True).order_by('-created_at')[:10]
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_budgets_view(request):
+    """Admin-only — list all user budgets."""
+    qs = BudgetSetup.objects.select_related('user').order_by('-created_at')[:100]
+    data = []
+    for b in qs:
+        data.append({
+            'id': b.id,
+            'username': b.user.username,
+            'month': b.month,
+            'monthly_income': float(b.monthly_income),
+            'savings_goal': float(b.savings_goal),
+            'savings_pct': b.savings_pct,
+        })
+    return Response({'count': len(data), 'budgets': data})

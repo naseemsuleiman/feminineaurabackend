@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Admin-only
     path('admin/subscribers/', views.subscribers_list_view, name='admin-subscribers'),
+    path('admin/budgets/', views.admin_budgets_view, name='admin-budgets'),
 
     # Router
     path('', include(router.urls)),
