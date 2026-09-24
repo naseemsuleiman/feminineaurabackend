@@ -1,0 +1,14 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/feminine_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name">Feminine Aura</h1>
+  <p style="text-align: center; color: rgba(59, 31, 43, 0.6); font-size: 13px; margin-top: -20px; margin-bottom: 30px; letter-spacing: 0.05em;">
+    Admin Console
+  </p>
+{% endblock %}

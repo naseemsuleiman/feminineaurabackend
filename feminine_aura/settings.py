@@ -41,7 +41,7 @@ ROOT_URLCONF = 'feminine_aura.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],   # ← add this
+        'DIRS': [BASE_DIR / 'templates'],  # ← ensures our override is found first
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -53,6 +53,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'feminine_aura.wsgi.application'
 
@@ -79,6 +80,10 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+ADMIN_SITE_HEADER = "Feminine Aura Admin"
+ADMIN_SITE_TITLE = "Feminine Aura"
+ADMIN_INDEX_TITLE = "Site Management"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
