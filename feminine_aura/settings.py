@@ -41,7 +41,7 @@ ROOT_URLCONF = 'feminine_aura.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],   # ← add this
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

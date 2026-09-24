@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feminine Aura — API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #FCE7F0 0%, #FFF9FA 50%, #F4B8C4 100%);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      color: #3B1F2B;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 2rem;
+      padding: 3rem 2.5rem;
+      max-width: 520px;
+      text-align: center;
+      box-shadow: 0 30px 80px -30px rgba(59, 31, 43, 0.3);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      background: #FCE7F0;
+      color: #A64B60;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+    h1 em {
+      color: #A64B60;
+      font-style: italic;
+    }
+    p {
+      color: #3B1F2B;
+      opacity: 0.7;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .endpoints {
+      text-align: left;
+      background: rgba(252, 231, 240, 0.5);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    .endpoints h3 {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #A64B60;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+    }
+    .endpoints a {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.55rem 0;
+      font-size: 0.85rem;
+      color: #3B1F2B;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(59, 31, 43, 0.08);
+      transition: color 0.2s;
+    }
+    .endpoints a:last-child { border-bottom: none; }
+    .endpoints a:hover { color: #A64B60; }
+    .endpoints code {
+      font-family: 'SF Mono', Menlo, monospace;
+      font-size: 0.75rem;
+      color: #A64B60;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+    }
+    .footer {
+      font-size: 0.75rem;
+      color: #3B1F2B;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">
+      <span class="dot"></span>
+      API Online
+    </div>
+    <h1>Feminine <em>Aura</em></h1>
+    <p>The backend is running smoothly. This is the API server — visit the frontend for the full experience.</p>
+
+    <div class="endpoints">
+      <h3>Available Endpoints</h3>
+      <a href="/api/site-status/">Site Status <code>GET /api/site-status/</code></a>
+      <a href="/api/subscribe/">Subscribe <code>POST /api/subscribe/</code></a>
+      <a href="/api/auth/login/">Login <code>POST /api/auth/login/</code></a>
+      <a href="/api/auth/register/">Register <code>POST /api/auth/register/</code></a>
+      <a href="/admin/">Admin Panel <code>/admin/</code></a>
+    </div>
+
+    <div class="footer">© 2026 Feminine Aura</div>
+  </div>
+</body>
+</html>
