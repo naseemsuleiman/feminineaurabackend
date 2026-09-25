@@ -20,11 +20,8 @@ PAYSTACK_API_URL = "https://api.paystack.co"
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
-    """Create a Paystack Payment Page redirect for the budget tracker."""
     user = request.user
-    # Paystack amounts are in kobo/cents. 1 KES = 100 subunits.
-    # Example: 1000 KES = 100000
-    amount_in_subunit = 1 * 100 
+    amount_in_subunit = 1 * 100
 
     frontend_url = request.data.get('frontend_url', 'https://www.feminine-aura.com')
 
@@ -54,7 +51,13 @@ def create_checkout_session(request):
         res_data = response.json()
 
         if res_data and res_data.get('status'):
-            return Response({'url': res_data['data']['authorization_url']})
+            # Grab the reference Paystack created
+            reference = res_data['data']['reference']
+            # Return both the URL and reference to the frontend
+            return Response({
+                'url': res_data['data']['authorization_url'],
+                'reference': reference,
+            })
         return Response(
             {'error': res_data.get('message', 'Initialization failed')},
             status=400,
@@ -109,4 +112,59 @@ def payment_status(request):
     return Response({
         'has_paid': request.user.profile.has_paid,
         'is_staff': request.user.is_staff,
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_payment(request):
+    """Verify a Paystack transaction by reference and unlock the user."""
+    reference = request.data.get('reference')
+    if not reference:
+        return Response({'error': 'Reference required'}, status=400)
+
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+    }
+
+    try:
+        r = requests.get(
+            f"{PAYSTACK_API_URL}/transaction/verify/{reference}",
+            headers=headers,
+            timeout=15,
+        )
+        r.raise_for_status()
+        data = r.json()
+    except requests.exceptions.RequestException as e:
+        return Response({'error': str(e)}, status=400)
+
+    if not data.get('status'):
+        return Response(
+            {'error': data.get('message', 'Verification failed')},
+            status=400,
+        )
+
+    txn = data.get('data', {})
+    if txn.get('status') != 'success':
+        return Response(
+            {'has_paid': False, 'status': txn.get('status')},
+            status=400,
+        )
+
+    # Double-check that this transaction belongs to THIS user
+    meta = txn.get('metadata') or {}
+    if str(meta.get('user_id')) != str(request.user.id):
+        return Response({'error': 'Transaction does not belong to you'}, status=403)
+
+    # Unlock
+    profile = request.user.profile
+    if not profile.has_paid:
+        profile.has_paid = True
+        profile.paid_at = timezone.now()
+        profile.save()
+
+    return Response({
+        'has_paid': True,
+        'reference': reference,
+        'amount': txn.get('amount'),
+        'paid_at': txn.get('paid_at'),
     })

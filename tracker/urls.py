@@ -30,6 +30,7 @@ urlpatterns = [
     path('payments/status/', payments.payment_status, name='payment-status'),
     path('payments/create-checkout-session/', payments.create_checkout_session, name='create-checkout'),
     path('payments/webhook/', payments.paystack_webhook, name='paystack-webhook'),
+    path('payments/verify/', payments.verify_payment, name='verify-payment'),
 
     # Router
     path('', include(router.urls)),
