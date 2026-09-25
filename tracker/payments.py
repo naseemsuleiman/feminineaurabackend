@@ -24,7 +24,7 @@ def create_checkout_session(request):
     user = request.user
     # Paystack amounts are in kobo/cents. 1 KES = 100 subunits.
     # Example: 1000 KES = 100000
-    amount_in_subunit = 1000 * 100
+    amount_in_subunit = 1 * 100 
 
     frontend_url = request.data.get('frontend_url', 'https://www.feminine-aura.com')
 
