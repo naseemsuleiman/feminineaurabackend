@@ -9,10 +9,11 @@ from .models import (
 class UserSerializer(serializers.ModelSerializer):
     display_name = serializers.CharField(source='profile.display_name', required=False)
     bio = serializers.CharField(source='profile.bio', required=False)
+    has_paid = serializers.BooleanField(source='profile.has_paid', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'is_staff', 'email', 'display_name', 'bio']
+        fields = ['id', 'username', 'is_staff', 'email', 'display_name','has_paid', 'bio']
         read_only_fields = ['id', 'is_staff']
 
     def update(self, instance, validated_data):

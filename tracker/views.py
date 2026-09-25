@@ -99,6 +99,30 @@ class BudgetSetupViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'No budget for this month.'}, status=404)
         return Response(BudgetSetupSerializer(budget).data)
 
+class BudgetSetupViewSet(viewsets.ModelViewSet):
+    serializer_class = BudgetSetupSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return BudgetSetup.objects.filter(user=self.request.user).order_by('-month')
+
+    def create(self, request, *args, **kwargs):
+        # Gate: must have paid OR be staff
+        if not (request.user.profile.has_paid or request.user.is_staff):
+            return Response(
+                {'error': 'Payment required to create a budget.', 'code': 'payment_required'},
+                status=402,   # Payment Required
+            )
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not (request.user.profile.has_paid or request.user.is_staff):
+            return Response(
+                {'error': 'Payment required.', 'code': 'payment_required'},
+                status=402,
+            )
+        return super().update(request, *args, **kwargs)
+
 
 class DailyEntryViewSet(viewsets.ModelViewSet):
     serializer_class = DailyEntrySerializer

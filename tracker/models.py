@@ -8,6 +8,12 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     display_name = models.CharField(max_length=100, blank=True)
     bio = models.TextField(blank=True)
+    has_paid = models.BooleanField(
+        default=False,
+        help_text="True once the user has paid for budget tracker access."
+    )
+    paid_at = models.DateTimeField(null=True, blank=True)
+    stripe_customer_id = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
