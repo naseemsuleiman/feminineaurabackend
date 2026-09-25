@@ -21,7 +21,7 @@ PAYSTACK_API_URL = "https://api.paystack.co"
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
     user = request.user
-    amount_in_subunit = 1 * 100
+    amount_in_subunit = 0.1 * 100
 
     frontend_url = request.data.get('frontend_url', 'https://www.feminine-aura.com')
 
