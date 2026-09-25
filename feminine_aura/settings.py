@@ -1,13 +1,14 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-from decouple import config 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'ze9@isl)lpeotboyv-ayt^96j)xfg#9lh&6f#5!@@wx$#41&dp'
-SECRET_KEY = os.getenv('SECRET_KEY', SECRET_KEY)
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'ze9@isl)lpeotboyv-ayt^96j)xfg#9lh&6f#5!@@wx$#41&dp'
+)
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -26,9 +27,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',      # ← right after Security
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -42,7 +43,7 @@ ROOT_URLCONF = 'feminine_aura.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # ← ensures our override is found first
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -54,7 +55,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 WSGI_APPLICATION = 'feminine_aura.wsgi.application'
 
@@ -77,18 +77,23 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# ─── Static & Media ───
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ─── Admin branding ───
 ADMIN_SITE_HEADER = "Feminine Aura Admin"
 ADMIN_SITE_TITLE = "Feminine Aura"
 ADMIN_INDEX_TITLE = "Site Management"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS
+# ─── CORS ───
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -97,7 +102,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://feminineaurafrontend-ppymbaghi-naseems-projects-20034b0c.vercel.app",
 ]
 
-# Allow ANY Vercel, Netlify, and Render preview subdomain
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
     r"^https://.*\.netlify\.app$",
@@ -106,7 +110,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-# DRF
+# ─── DRF ───
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -121,10 +125,10 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
-STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
-STRIPE_PRICE_ID = config('STRIPE_PRICE_ID', default='')  # one-time price
+# ─── Payments (Paystack) ───
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
 
-PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
-PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY', default='')
+# ─── Whitenoise: allow media too, if needed ───
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
