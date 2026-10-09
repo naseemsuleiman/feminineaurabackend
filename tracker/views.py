@@ -83,7 +83,27 @@ class BudgetSetupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return BudgetSetup.objects.filter(user=self.request.user).order_by('-month')
 
+    def create(self, request, *args, **kwargs):
+        # Gate: must have paid OR be staff
+        has_paid = getattr(getattr(request.user, 'profile', None), 'has_paid', False)
+        if not (has_paid or request.user.is_staff):
+            return Response(
+                {'error': 'Payment required to create a budget.', 'code': 'payment_required'},
+                status=status.HTTP_402_PAYMENT_REQUIRED,
+            )
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        has_paid = getattr(getattr(request.user, 'profile', None), 'has_paid', False)
+        if not (has_paid or request.user.is_staff):
+            return Response(
+                {'error': 'Payment required.', 'code': 'payment_required'},
+                status=status.HTTP_402_PAYMENT_REQUIRED,
+            )
+        return super().update(request, *args, **kwargs)
+
     def perform_create(self, serializer):
+        # Attach user to budget instance and create 30 daily entries
         budget = serializer.save(user=self.request.user)
         for day in range(1, 31):
             DailyEntry.objects.create(budget=budget, day=day)
@@ -98,30 +118,6 @@ class BudgetSetupViewSet(viewsets.ModelViewSet):
         if not budget:
             return Response({'detail': 'No budget for this month.'}, status=404)
         return Response(BudgetSetupSerializer(budget).data)
-
-class BudgetSetupViewSet(viewsets.ModelViewSet):
-    serializer_class = BudgetSetupSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return BudgetSetup.objects.filter(user=self.request.user).order_by('-month')
-
-    def create(self, request, *args, **kwargs):
-        # Gate: must have paid OR be staff
-        if not (request.user.profile.has_paid or request.user.is_staff):
-            return Response(
-                {'error': 'Payment required to create a budget.', 'code': 'payment_required'},
-                status=402,   # Payment Required
-            )
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if not (request.user.profile.has_paid or request.user.is_staff):
-            return Response(
-                {'error': 'Payment required.', 'code': 'payment_required'},
-                status=402,
-            )
-        return super().update(request, *args, **kwargs)
 
 
 class DailyEntryViewSet(viewsets.ModelViewSet):
