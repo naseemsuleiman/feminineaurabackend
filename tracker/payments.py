@@ -21,7 +21,11 @@ PAYSTACK_API_URL = "https://api.paystack.co"
 @permission_classes([IsAuthenticated])
 def create_checkout_session(request):
     user = request.user
-    amount_in_subunit = 0.1 * 100
+
+    # Paystack requires amount in subunits as an INTEGER.
+    # KES 1 = 100 subunits (cents).
+    # Ensure minimum amount is at least 100 subunits (1 KES).
+    amount_in_subunit = 100  # 100 subunits = KES 1.00
 
     frontend_url = request.data.get('frontend_url', 'https://www.feminine-aura.com')
 
@@ -29,10 +33,12 @@ def create_checkout_session(request):
         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
         "Content-Type": "application/json",
     }
+    
     data = {
         "email": user.email or f"{user.username}@feminine-aura.com",
-        "amount": amount_in_subunit,
+        "amount": int(amount_in_subunit),  # Must be integer
         "currency": "KES",
+        "channels": ["card", "mobile_money"],  # Enables M-Pesa alongside Card
         "callback_url": f"{frontend_url}/budget-tracker?payment=success",
         "metadata": {
             "user_id": user.id,
@@ -47,23 +53,22 @@ def create_checkout_session(request):
             headers=headers,
             timeout=15,
         )
-        response.raise_for_status()
         res_data = response.json()
 
-        if res_data and res_data.get('status'):
-            # Grab the reference Paystack created
+        if response.status_code == 200 and res_data.get('status'):
+            # Grab reference and checkout URL
             reference = res_data['data']['reference']
-            # Return both the URL and reference to the frontend
             return Response({
                 'url': res_data['data']['authorization_url'],
                 'reference': reference,
             })
-        return Response(
-            {'error': res_data.get('message', 'Initialization failed')},
-            status=400,
-        )
+        
+        # Return exact error message from Paystack API if rejected
+        error_msg = res_data.get('message', 'Initialization failed')
+        return Response({'error': error_msg}, status=400)
+
     except requests.exceptions.RequestException as e:
-        return Response({'error': str(e)}, status=400)
+        return Response({'error': f"Network error: {str(e)}"}, status=400)
 
 
 @csrf_exempt
@@ -74,7 +79,7 @@ def paystack_webhook(request):
     payload = request.body
     signature = request.META.get('HTTP_X_PAYSTACK_SIGNATURE', '')
 
-    # Verify the signature
+    # Verify signature from Paystack
     computed_signature = hmac.new(
         settings.PAYSTACK_SECRET_KEY.encode('utf-8'),
         payload,
@@ -114,6 +119,7 @@ def payment_status(request):
         'is_staff': request.user.is_staff,
     })
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def verify_payment(request):
@@ -132,7 +138,6 @@ def verify_payment(request):
             headers=headers,
             timeout=15,
         )
-        r.raise_for_status()
         data = r.json()
     except requests.exceptions.RequestException as e:
         return Response({'error': str(e)}, status=400)
@@ -150,12 +155,12 @@ def verify_payment(request):
             status=400,
         )
 
-    # Double-check that this transaction belongs to THIS user
+    # Confirm that this transaction belongs to the requesting user
     meta = txn.get('metadata') or {}
     if str(meta.get('user_id')) != str(request.user.id):
         return Response({'error': 'Transaction does not belong to you'}, status=403)
 
-    # Unlock
+    # Unlock account access
     profile = request.user.profile
     if not profile.has_paid:
         profile.has_paid = True
