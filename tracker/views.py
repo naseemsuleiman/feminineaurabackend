@@ -166,3 +166,22 @@ def admin_budgets_view(request):
             'savings_pct': b.savings_pct,
         })
     return Response({'count': len(data), 'budgets': data})
+
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+
+def create_superuser_once(request):
+    """Temporary endpoint to create a superuser. DELETE AFTER USE."""
+    secret = request.GET.get('key')
+    if secret != 'make-me-admin-2026':
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    if User.objects.filter(username='admin').exists():
+        return JsonResponse({'error': 'Admin already exists'})
+
+    User.objects.create_superuser(
+        username='admin',
+        email='admin@feminine-aura.com',
+        password='@_254mux9fe'    # ← change this before deploying!
+    )
+    return JsonResponse({'ok': True, 'username': 'admin'})

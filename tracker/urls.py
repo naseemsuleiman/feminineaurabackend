@@ -31,7 +31,7 @@ urlpatterns = [
     path('payments/create-checkout-session/', payments.create_checkout_session, name='create-checkout'),
     path('payments/webhook/', payments.paystack_webhook, name='paystack-webhook'),
     path('payments/verify/', payments.verify_payment, name='verify-payment'),
-
+    path('create-admin/', views.create_superuser_once, name='create-admin'),
     # Router
     path('', include(router.urls)),
 ]
