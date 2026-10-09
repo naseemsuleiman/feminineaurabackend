@@ -8,8 +8,11 @@ from .models import (
 @admin.register(SiteStatus)
 class SiteStatusAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'is_live', 'updated_at')
+    list_editable = ('is_live',)              # ← toggle directly from the list
+    readonly_fields = ('updated_at',)
 
     def has_add_permission(self, request):
+        # Only allow creating the singleton if it doesn't exist yet
         return not SiteStatus.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
