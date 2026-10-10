@@ -18,19 +18,42 @@
 }
 
 /* ═══════════════════════════════════════════════════════
-   GLOBAL
+   GLOBAL & SCROLL FIXES (DESKTOP + MOBILE)
    ═══════════════════════════════════════════════════════ */
-html, body {
+html {
   font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   background: var(--blush-50) !important;
   color: var(--mulberry) !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
 }
 
-body, #container, #main, #content-main, #content {
+body {
   background: var(--blush-50) !important;
   color: var(--mulberry) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#container {
+  background: var(--blush-50) !important;
+  color: var(--mulberry) !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+#main, #content-main, #content {
+  background: var(--blush-50) !important;
+  color: var(--mulberry) !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 a:link, a:visited {
@@ -241,13 +264,13 @@ div.breadcrumbs a:hover {
 }
 
 /* ═══════════════════════════════════════════════════════
-   CHANGE LIST TABLE (fixes the black rows)
+   CHANGE LIST TABLE
    ═══════════════════════════════════════════════════════ */
 #changelist {
   background: var(--white) !important;
   border-radius: 16px !important;
   border: 1px solid var(--border) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   box-shadow: 0 6px 24px -10px rgba(59, 31, 43, 0.10) !important;
 }
 
@@ -283,7 +306,6 @@ div.breadcrumbs a:hover {
   background: var(--white) !important;
 }
 
-/* kill the black alternate rows */
 #changelist .row1,
 #changelist .row2,
 #changelist tbody tr.row1,
@@ -306,14 +328,12 @@ div.breadcrumbs a:hover {
   background: var(--blush-100) !important;
 }
 
-/* the "LIVE" text in the Site Status row */
 #changelist tbody td.field-__str__,
 #changelist tbody th.field-__str__ {
   color: var(--rose-600) !important;
   font-weight: 600 !important;
 }
 
-/* make sure the inline-editable checkbox is visible */
 #changelist tbody td.field-is_live,
 #changelist tbody td.field-is_live input[type="checkbox"] {
   background: inherit !important;
@@ -408,7 +428,7 @@ div.breadcrumbs a:hover {
 }
 
 /* ═══════════════════════════════════════════════════════
-   LEFT SIDEBAR (nav-sidebar) — kills the black background
+   LEFT SIDEBAR (nav-sidebar)
    ═══════════════════════════════════════════════════════ */
 #nav-sidebar,
 .nav-sidebar,
@@ -471,7 +491,6 @@ div.breadcrumbs a:hover {
   color: var(--mulberry) !important;
 }
 
-/* sidebar collapse toggle */
 .toggle-nav-sidebar,
 #toggle-nav-sidebar {
   background: var(--white) !important;
@@ -808,21 +827,7 @@ body.login .password-reset-link {
 }
 
 /* ═══════════════════════════════════════════════════════
-   INLINE EDITING (list_editable) — Save button row
-   ═══════════════════════════════════════════════════════ */
-#changelist-form .actions,
-#changelist .actions {
-  background: var(--blush-50) !important;
-  color: var(--mulberry) !important;
-}
-
-#changelist-form .actions select,
-#changelist-form .actions input {
-  color: var(--mulberry) !important;
-}
-
-/* ═══════════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE & MOBILE LAYOUT FIXES
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   #header { padding: 14px 18px !important; }
@@ -836,14 +841,29 @@ body.login .password-reset-link {
   #branding h1, #branding h1 a {
     font-size: 18px !important;
   }
+  #changelist {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
   #changelist-filter {
-    margin-left: 0 !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 16px 0 !important;
   }
 }
 
 /* ═══════════════════════════════════════════════════════
-   FINAL SAFETY NETS — kill any stray dark backgrounds
+   FINAL UNLOCK SAFETY NETS
    ═══════════════════════════════════════════════════════ */
+#changelist-form,
+.change-list,
+#changelist-inner,
+.flex-container {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 #result_list tbody tr,
 #result_list tbody tr.row1,
 #result_list tbody tr.row2,
@@ -875,7 +895,6 @@ body.login .password-reset-link {
   color: var(--mulberry) !important;
 }
 
-/* Dark text on any element that might inherit from Django's defaults */
 #content, #content *,
 #changelist, #changelist *,
 #nav-sidebar, #nav-sidebar * {
